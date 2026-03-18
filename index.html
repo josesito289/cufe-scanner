@@ -6,9 +6,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#060b18">
-<title>QR Scanner · Facturas</title>
+<title>QR Facturas · DIAN</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <style>
   :root {
     --bg:      #060b18;
@@ -22,93 +21,166 @@
     --muted:   #5a7a9a;
     --mono:    'Space Mono', monospace;
     --sans:    'Syne', sans-serif;
-    --r:       12px;
+    --r:       14px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100dvh; display: flex; flex-direction: column; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--sans); min-height: 100dvh;
+    display: flex; flex-direction: column;
+  }
 
-  header { padding: 16px 18px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-  .logo { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), #0066cc); border-radius: 9px; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; font-weight: 700; color: #000; flex-shrink: 0; box-shadow: 0 0 18px rgba(0,229,255,.25); }
-  header h1 { font-size: 17px; font-weight: 800; line-height: 1; }
-  header p  { font-size: 10px; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; margin-top: 2px; }
+  /* ── HEADER ── */
+  header {
+    padding: 14px 18px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .logo {
+    width: 40px; height: 40px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent), #0055bb);
+    border-radius: 10px; display: grid; place-items: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    color: #000; box-shadow: 0 0 20px rgba(0,229,255,.3);
+  }
+  header h1 { font-size: 18px; font-weight: 800; line-height: 1; }
+  header p  { font-size: 10px; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; margin-top: 3px; }
+  .hcount {
+    margin-left: auto;
+    background: rgba(0,229,255,.1); border: 1px solid rgba(0,229,255,.25);
+    border-radius: 20px; padding: 4px 14px;
+    font-family: var(--mono); font-size: 13px; font-weight: 700;
+    color: var(--accent);
+  }
 
+  /* ── TABS ── */
   .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
-  .tab { flex: 1; padding: 11px 4px; background: none; border: none; cursor: pointer; font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .5px; position: relative; transition: color .2s; }
+  .tab  { flex: 1; padding: 10px 4px; background: none; border: none; cursor: pointer; font-family: var(--sans); font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .5px; position: relative; transition: color .2s; }
   .tab.on { color: var(--accent); }
-  .tab.on::after { content: ''; position: absolute; bottom: 0; left: 12%; right: 12%; height: 2px; background: var(--accent); border-radius: 2px 2px 0 0; box-shadow: 0 0 8px var(--accent); }
-  .tab-icon { display: block; font-size: 17px; margin-bottom: 2px; }
+  .tab.on::after { content: ''; position: absolute; bottom: 0; left: 10%; right: 10%; height: 2px; background: var(--accent); border-radius: 2px 2px 0 0; box-shadow: 0 0 8px var(--accent); }
+  .ti { display: block; font-size: 18px; margin-bottom: 2px; }
 
-  main { flex: 1; }
-  .panel { display: none; flex-direction: column; align-items: center; padding: 20px 16px; gap: 16px; }
+  /* ── PANELS ── */
+  main { flex: 1; overflow-y: auto; }
+  .panel { display: none; flex-direction: column; align-items: center; padding: 18px 16px; gap: 14px; }
   .panel.on { display: flex; }
 
-  /* ── ZONA CAPTURA ── */
-  .capture-zone { width: 100%; max-width: 340px; background: var(--surface); border: 2px dashed var(--border); border-radius: var(--r); min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px; transition: border-color .3s; position: relative; overflow: hidden; }
-  .capture-zone.has-img { border-style: solid; border-color: var(--accent); padding: 0; }
-  #preview { width: 100%; border-radius: 10px; display: none; object-fit: contain; max-height: 260px; }
-  #preview.on { display: block; }
-  .zone-hint { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--muted); text-align: center; }
-  .zone-hint.hide { display: none; }
-  .zone-ico { font-size: 40px; opacity: .4; }
-  .zone-hint p { font-size: 12px; line-height: 1.6; font-family: var(--mono); }
-  .processing { position: absolute; inset: 0; background: rgba(6,11,24,.85); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; border-radius: 10px; }
-  .processing.on { display: flex; }
-  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .processing p { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  /* ══════════════════════════════
+     PANEL PEGAR
+  ══════════════════════════════ */
 
-  /* ── BOTONES CAPTURA ── */
-  .cap-row { width: 100%; max-width: 340px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .cap-btn { padding: 16px 8px; border: none; border-radius: var(--r); font-family: var(--sans); font-size: 13px; font-weight: 700; cursor: pointer; transition: transform .12s; display: flex; flex-direction: column; align-items: center; gap: 6px; line-height: 1.2; }
-  .cap-btn:active { transform: scale(.95); }
-  .cap-btn .ico { font-size: 26px; }
-  .cap-btn.cam { background: var(--accent); color: #000; box-shadow: 0 0 20px rgba(0,229,255,.28); }
-  .cap-btn.gal { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-  #inp-cam, #inp-gal { display: none; }
+  /* Instrucción rápida */
+  .steps {
+    width: 100%; max-width: 400px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .step {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; line-height: 1.5; color: var(--muted);
+  }
+  .step-n {
+    width: 22px; height: 22px; flex-shrink: 0;
+    background: rgba(0,229,255,.12); border: 1px solid rgba(0,229,255,.3);
+    border-radius: 50%; display: grid; place-items: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent);
+  }
 
-  /* ── STATUS ── */
-  .status { width: 100%; max-width: 340px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 14px; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--muted); transition: background .3s; }
-  .dot.ok   { background: var(--ok);   box-shadow: 0 0 6px var(--ok); }
-  .dot.dup  { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
-  .dot.err  { background: var(--err);  box-shadow: 0 0 6px var(--err); }
-  .dot.proc { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: blink 1s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  /* Área de pegado — GRANDE para dedos gordos */
+  .paste-wrap { width: 100%; max-width: 400px; position: relative; }
 
-  /* ── RESULTADO ── */
-  .result-box { width: 100%; max-width: 340px; background: rgba(0,229,255,.05); border: 1px solid rgba(0,229,255,.2); border-radius: var(--r); padding: 13px; display: none; }
-  .result-box.on { display: block; }
-  .res-label { font-size: 10px; letter-spacing: 2px; color: var(--accent); font-family: var(--mono); margin-bottom: 7px; }
-  .res-content { font-family: var(--mono); font-size: 11px; word-break: break-all; line-height: 1.75; color: var(--text); background: rgba(0,0,0,.3); padding: 8px; border-radius: 6px; max-height: 180px; overflow-y: auto; }
-  .res-meta { margin-top: 7px; font-size: 10px; color: var(--muted); font-family: var(--mono); }
+  #txt-input {
+    width: 100%; min-height: 130px;
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: var(--r); padding: 14px;
+    font-family: var(--mono); font-size: 12px; line-height: 1.7;
+    color: var(--text); resize: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
+  #txt-input:focus { outline: none; border-color: var(--accent); }
+  #txt-input::placeholder { color: var(--muted); }
 
-  .btn-add { width: 100%; max-width: 340px; padding: 13px; border: none; border-radius: var(--r); background: var(--ok); color: #000; font-family: var(--sans); font-size: 14px; font-weight: 700; cursor: pointer; transition: transform .12s; box-shadow: 0 0 18px rgba(0,255,136,.25); display: none; }
-  .btn-add.on { display: block; }
-  .btn-add:active { transform: scale(.97); }
+  /* Botón limpiar campo */
+  .clear-field {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(255,107,53,.15); border: 1px solid rgba(255,107,53,.3);
+    border-radius: 6px; padding: 4px 8px;
+    font-size: 11px; color: var(--err); cursor: pointer;
+    font-family: var(--mono); display: none;
+  }
+  .clear-field.on { display: block; }
 
-  /* ── LISTA ── */
-  #p-lista { padding: 14px; gap: 11px; }
-  .list-head { width: 100%; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-  .list-head h2 { font-size: 15px; font-weight: 800; }
-  .badge { background: var(--accent); color: #000; border-radius: 20px; padding: 3px 12px; font-family: var(--mono); font-size: 12px; font-weight: 700; }
-  .act-row { width: 100%; display: flex; gap: 8px; }
-  .abtn { padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; font-family: var(--sans); font-size: 13px; font-weight: 700; transition: transform .12s; }
+  /* Botón PEGAR del sistema */
+  .btn-paste-sys {
+    width: 100%; max-width: 400px;
+    padding: 14px; border: none; border-radius: var(--r);
+    background: var(--surface); color: var(--accent);
+    border: 1px dashed rgba(0,229,255,.4);
+    font-family: var(--sans); font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all .15s;
+    letter-spacing: .3px;
+  }
+  .btn-paste-sys:active { background: rgba(0,229,255,.08); transform: scale(.98); }
+
+  /* Botón GUARDAR — el más importante, enorme */
+  .btn-save {
+    width: 100%; max-width: 400px;
+    padding: 18px; border: none; border-radius: var(--r);
+    background: var(--ok); color: #000;
+    font-family: var(--sans); font-size: 17px; font-weight: 800;
+    cursor: pointer; letter-spacing: .5px;
+    box-shadow: 0 0 30px rgba(0,255,136,.35);
+    transition: transform .1s, background .1s;
+  }
+  .btn-save:active { transform: scale(.97); background: #00cc6e; }
+
+  /* Preview de lo que se va a guardar */
+  .preview-box {
+    width: 100%; max-width: 400px;
+    background: rgba(0,229,255,.04); border: 1px solid rgba(0,229,255,.15);
+    border-radius: var(--r); padding: 12px 14px;
+    display: none;
+  }
+  .preview-box.on { display: block; }
+  .prev-label { font-size: 10px; letter-spacing: 2px; color: var(--accent); font-family: var(--mono); margin-bottom: 6px; }
+  .prev-content { font-family: var(--mono); font-size: 11px; word-break: break-all; line-height: 1.75; color: var(--text); max-height: 100px; overflow: hidden; position: relative; }
+  .prev-content::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, rgba(6,11,24,.9)); }
+  .dup-badge { display: inline-block; margin-top: 6px; background: rgba(255,204,0,.15); border: 1px solid var(--warn); border-radius: 6px; padding: 3px 10px; font-family: var(--mono); font-size: 10px; color: var(--warn); }
+
+  /* ══════════════════════════════
+     PANEL LISTA
+  ══════════════════════════════ */
+  #p-lista { padding: 14px 16px; gap: 12px; }
+
+  .list-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .list-head h2 { font-size: 16px; font-weight: 800; }
+  .badge { background: var(--accent); color: #000; border-radius: 20px; padding: 3px 13px; font-family: var(--mono); font-size: 12px; font-weight: 700; }
+
+  .act-row { width: 100%; display: flex; gap: 8px; flex-wrap: wrap; }
+  .abtn { padding: 11px 18px; border-radius: 9px; border: none; cursor: pointer; font-family: var(--sans); font-size: 13px; font-weight: 700; transition: transform .12s; }
   .abtn:active { transform: scale(.96); }
-  .abtn.dl  { background: var(--ok); color: #000; box-shadow: 0 0 14px rgba(0,255,136,.25); }
+  .abtn.dl  { background: var(--ok);  color: #000; box-shadow: 0 0 14px rgba(0,255,136,.25); }
   .abtn.clr { background: var(--surface); color: var(--err); border: 1px solid var(--err); }
+
   .empty { width: 100%; padding: 50px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--muted); text-align: center; font-size: 13px; line-height: 1.6; }
-  .empty-ico { font-size: 44px; opacity: .35; }
+  .empty-ico { font-size: 48px; opacity: .3; }
+
   .qr-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
-  .qr-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 13px; animation: pop .2s ease; }
-  @keyframes pop { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+  .qr-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; animation: pop .2s ease; }
+  @keyframes pop { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
   .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 7px; }
   .card-num  { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 1px; }
   .card-time { font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
-  .card-body { font-family: var(--mono); font-size: 11px; word-break: break-all; line-height: 1.75; color: var(--text); background: rgba(0,0,0,.25); padding: 8px; border-radius: 6px; max-height: 120px; overflow-y: auto; }
-  .del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 15px; flex-shrink: 0; line-height: 1; transition: color .15s; padding: 0 2px; }
+  .card-body { font-family: var(--mono); font-size: 11px; word-break: break-all; line-height: 1.75; color: var(--text); background: rgba(0,0,0,.25); padding: 8px; border-radius: 6px; max-height: 100px; overflow-y: auto; }
+  .del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; flex-shrink: 0; line-height: 1; transition: color .15s; padding: 0 3px; }
   .del:active { color: var(--err); }
 
-  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--ok); color: #000; border-radius: 24px; padding: 10px 22px; font-family: var(--sans); font-size: 13px; font-weight: 700; z-index: 999; pointer-events: none; opacity: 0; transition: opacity .2s; white-space: nowrap; }
+  /* ── TOAST ── */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ok); color: #000; border-radius: 28px; padding: 12px 26px; font-family: var(--sans); font-size: 14px; font-weight: 700; z-index: 999; pointer-events: none; opacity: 0; transition: opacity .2s; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
   .toast.on { opacity: 1; } .toast.warn { background: var(--warn); } .toast.err { background: var(--err); color: #fff; }
 </style>
 </head>
@@ -116,81 +188,86 @@
 
 <header>
   <div class="logo">QR</div>
-  <div><h1>QR Scanner</h1><p>FACTURAS ELECTRÓNICAS · DIAN</p></div>
+  <div>
+    <h1>QR Facturas</h1>
+    <p>REGISTRO DIAN · COLOMBIA</p>
+  </div>
+  <div class="hcount" id="hcount">0</div>
 </header>
 
 <nav class="tabs">
-  <button class="tab on" onclick="goTab('scan',this)"><span class="tab-icon">📷</span>ESCANEAR</button>
-  <button class="tab"    onclick="goTab('lista',this)"><span class="tab-icon">📋</span>LISTA</button>
+  <button class="tab on" onclick="goTab('pegar',this)"><span class="ti">📋</span>PEGAR QR</button>
+  <button class="tab"    onclick="goTab('lista',this)"><span class="ti">🗂️</span>LISTA</button>
 </nav>
 
 <main>
 
-  <section id="p-scan" class="panel on">
+  <!-- ══ PANEL PEGAR ══ -->
+  <section id="p-pegar" class="panel on">
 
-    <div class="capture-zone" id="zone">
-      <div class="zone-hint" id="hint">
-        <div class="zone-ico">🧾</div>
-        <p>Toma una foto del QR<br>o selecciona de galería</p>
-      </div>
-      <img id="preview" alt="Vista previa">
-      <div class="processing" id="proc">
-        <div class="spinner"></div>
-        <p>Leyendo QR…</p>
-      </div>
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><span>Escanea el QR con tu app de cámara o escáner QR</span></div>
+      <div class="step"><div class="step-n">2</div><span>Copia el texto que aparece (mantén presionado → Copiar)</span></div>
+      <div class="step"><div class="step-n">3</div><span>Pega aquí abajo y presiona <strong>GUARDAR</strong></span></div>
     </div>
 
-    <!-- capture="environment" abre cámara trasera directamente -->
-    <input type="file" id="inp-cam" accept="image/*" capture="environment" onchange="processFile(this)">
-    <input type="file" id="inp-gal" accept="image/*"                       onchange="processFile(this)">
-
-    <div class="cap-row">
-      <button class="cap-btn cam" onclick="document.getElementById('inp-cam').click()">
-        <span class="ico">📷</span>Tomar foto
-      </button>
-      <button class="cap-btn gal" onclick="document.getElementById('inp-gal').click()">
-        <span class="ico">🖼️</span>Galería
-      </button>
+    <div class="paste-wrap">
+      <textarea id="txt-input"
+        placeholder="Pega aquí el contenido del QR…&#10;&#10;Ejemplo:&#10;https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey=ABC123&cufe=a1b2c3..."
+        oninput="onInput()"
+      ></textarea>
+      <button class="clear-field" id="btn-clear-field" onclick="clearField()">✕ limpiar</button>
     </div>
 
-    <div class="status">
-      <div class="dot" id="dot"></div>
-      <span id="stxt">Toma una foto del código QR</span>
+    <!-- Botón pegar del sistema (usa Clipboard API) -->
+    <button class="btn-paste-sys" onclick="pasteFromClipboard()">
+      📌 Pegar desde portapapeles
+    </button>
+
+    <!-- Preview -->
+    <div class="preview-box" id="preview-box">
+      <div class="prev-label">VISTA PREVIA</div>
+      <div class="prev-content" id="prev-content"></div>
+      <span class="dup-badge" id="dup-badge" style="display:none">⚠ Ya registrado</span>
     </div>
 
-    <div class="result-box" id="res-box">
-      <div class="res-label">CONTENIDO DEL QR</div>
-      <div class="res-content" id="res-content"></div>
-      <div class="res-meta"    id="res-meta"></div>
-    </div>
-
-    <button class="btn-add" id="btn-add" onclick="addToList()">✔ Agregar a la lista</button>
+    <!-- BOTÓN PRINCIPAL -->
+    <button class="btn-save" onclick="guardar()">✔ GUARDAR FACTURA</button>
 
   </section>
 
+  <!-- ══ PANEL LISTA ══ -->
   <section id="p-lista" class="panel">
+
     <div class="list-head">
-      <h2>Documentos escaneados</h2>
+      <h2>Documentos registrados</h2>
       <span class="badge" id="cnt">0</span>
     </div>
+
     <div class="act-row">
       <button class="abtn dl"  onclick="exportTXT()">⬇ Descargar TXT</button>
-      <button class="abtn clr" onclick="clearAll()">🗑 Limpiar</button>
+      <button class="abtn clr" onclick="clearAll()">🗑 Limpiar todo</button>
     </div>
-    <div id="list-wrap" style="width:100%">
-      <div class="empty" id="empty"><div class="empty-ico">📭</div><p>Aún no has agregado<br>ninguna factura.</p></div>
+
+    <div style="width:100%">
+      <div class="empty" id="empty">
+        <div class="empty-ico">📭</div>
+        <p>Aún no has registrado<br>ninguna factura.</p>
+      </div>
       <div class="qr-list" id="qr-list"></div>
     </div>
+
   </section>
 
 </main>
 
 <div class="toast" id="toast"></div>
-<canvas id="cv" style="display:none"></canvas>
 
 <script>
-const S = { docs: [], seen: new Set(), pending: null };
+// ── ESTADO ──────────────────────────────────
+const S = { docs: [], seen: new Set() };
 
+// ── TABS ────────────────────────────────────
 function goTab(name, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
@@ -198,114 +275,88 @@ function goTab(name, btn) {
   btn.classList.add('on');
 }
 
-function processFile(input) {
-  const file = input.files[0];
-  if (!file) return;
-  input.value = '';
-  const reader = new FileReader();
-  reader.onload = e => loadImage(e.target.result);
-  reader.readAsDataURL(file);
-}
+// ── INPUT / PREVIEW ─────────────────────────
+function onInput() {
+  const val = document.getElementById('txt-input').value.trim();
+  const clearBtn  = document.getElementById('btn-clear-field');
+  const preBox    = document.getElementById('preview-box');
+  const preCont   = document.getElementById('prev-content');
+  const dupBadge  = document.getElementById('dup-badge');
 
-function loadImage(src) {
-  const preview = document.getElementById('preview');
-  const zone    = document.getElementById('zone');
-  const hint    = document.getElementById('hint');
-  const proc    = document.getElementById('proc');
+  clearBtn.classList.toggle('on', val.length > 0);
 
-  preview.src = src;
-  preview.classList.add('on');
-  hint.classList.add('hide');
-  zone.classList.add('has-img');
-  proc.classList.add('on');
-  setSt('proc', 'Procesando imagen…');
-
-  document.getElementById('res-box').classList.remove('on');
-  document.getElementById('btn-add').classList.remove('on');
-  S.pending = null;
-
-  const img = new Image();
-  img.onload = () => {
-    // Escalar imagen (máx 1500px) para mejor lectura sin saturar memoria
-    const MAX = 1500;
-    let w = img.width, h = img.height;
-    if (w > MAX || h > MAX) {
-      const ratio = Math.min(MAX / w, MAX / h);
-      w = Math.round(w * ratio);
-      h = Math.round(h * ratio);
-    }
-
-    const cv  = document.getElementById('cv');
-    const ctx = cv.getContext('2d', { willReadFrequently: true });
-    cv.width = w; cv.height = h;
-    ctx.drawImage(img, 0, 0, w, h);
-
-    const imgData = ctx.getImageData(0, 0, w, h);
-    proc.classList.remove('on');
-
-    // Intento 1: imagen normal
-    let code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
-
-    if (!code) {
-      // Intento 2: aumentar contraste antes de reintentar
-      const d = imgData.data;
-      for (let i = 0; i < d.length; i += 4) {
-        d[i]   = d[i]   < 128 ? 0 : 255;
-        d[i+1] = d[i+1] < 128 ? 0 : 255;
-        d[i+2] = d[i+2] < 128 ? 0 : 255;
-      }
-      code = jsQR(d, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
-    }
-
-    if (code) {
-      showResult(code.data);
-    } else {
-      setSt('err', 'QR no detectado — intenta más cerca o mejor iluminación');
-      toast('QR no detectado', 'err');
-    }
-  };
-  img.src = src;
-}
-
-function showResult(raw) {
-  if (S.seen.has(raw)) {
-    setSt('dup', 'Este QR ya está en la lista');
-    toast('Factura ya registrada', 'warn');
-    document.getElementById('res-content').textContent = raw;
-    document.getElementById('res-meta').textContent    = '⚠ Duplicado';
-    document.getElementById('res-box').classList.add('on');
-    document.getElementById('btn-add').classList.remove('on');
-    S.pending = null;
+  if (val.length === 0) {
+    preBox.classList.remove('on');
     return;
   }
-  S.pending = raw;
-  document.getElementById('res-content').textContent = raw;
-  document.getElementById('res-meta').textContent    = '✔ QR leído — presiona Agregar para guardar';
-  document.getElementById('res-box').classList.add('on');
-  document.getElementById('btn-add').classList.add('on');
-  setSt('ok', 'QR leído correctamente');
-  toast('QR detectado ✔');
+
+  preCont.textContent = val;
+  dupBadge.style.display = S.seen.has(val) ? 'inline-block' : 'none';
+  preBox.classList.add('on');
 }
 
-function addToList() {
-  if (!S.pending) return;
-  const doc = { raw: S.pending, ts: new Date(), n: S.docs.length + 1 };
+function clearField() {
+  document.getElementById('txt-input').value = '';
+  onInput();
+}
+
+// ── PEGAR DESDE PORTAPAPELES ─────────────────
+async function pasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text) { toast('Portapapeles vacío', 'warn'); return; }
+    document.getElementById('txt-input').value = text;
+    onInput();
+    toast('Pegado ✔');
+  } catch(e) {
+    // Fallback: enfocar el textarea para que el usuario pegue manualmente
+    document.getElementById('txt-input').focus();
+    toast('Mantén presionado el campo y elige Pegar', 'warn');
+  }
+}
+
+// ── GUARDAR ─────────────────────────────────
+function guardar() {
+  const raw = document.getElementById('txt-input').value.trim();
+
+  if (!raw) {
+    toast('El campo está vacío', 'err');
+    document.getElementById('txt-input').focus();
+    return;
+  }
+
+  if (S.seen.has(raw)) {
+    toast('Esta factura ya está registrada', 'warn');
+    return;
+  }
+
+  const doc = { raw, ts: new Date(), n: S.docs.length + 1 };
   S.docs.unshift(doc);
-  S.seen.add(S.pending);
-  S.pending = null;
-  document.getElementById('btn-add').classList.remove('on');
-  document.getElementById('res-meta').textContent = `Guardado como Factura #${doc.n}`;
-  save(); refresh();
+  S.seen.add(raw);
+
+  // Limpiar campo para la siguiente
+  clearField();
+
+  save();
+  refresh();
   toast(`Factura #${doc.n} guardada ✔`);
+
+  // Actualizar contador del header
+  document.getElementById('hcount').textContent = S.docs.length;
 }
 
+// ── RENDER LISTA ────────────────────────────
 function refresh() {
-  const n = S.docs.length;
-  document.getElementById('cnt').textContent = n;
+  const n     = S.docs.length;
   const empty = document.getElementById('empty');
   const list  = document.getElementById('qr-list');
+
+  document.getElementById('cnt').textContent    = n;
+  document.getElementById('hcount').textContent = n;
+
   if (n === 0) { empty.style.display = 'flex'; list.innerHTML = ''; return; }
   empty.style.display = 'none';
+
   list.innerHTML = S.docs.map(d => `
     <div class="qr-card">
       <div class="card-top">
@@ -323,44 +374,49 @@ function del(n) {
   save(); refresh();
 }
 
+// ── EXPORTAR TXT ────────────────────────────
 function exportTXT() {
   if (!S.docs.length) { toast('Nada que exportar', 'warn'); return; }
+
   const now = new Date();
   const lines = [
     '================================================================',
-    '     REGISTRO QR - FACTURAS ELECTRÓNICAS DIAN',
+    '       REGISTRO QR — FACTURAS ELECTRÓNICAS DIAN',
     '================================================================',
     `Generado : ${fmtFull(now)}`,
     `Total    : ${S.docs.length} documento(s)`,
-    '================================================================', '',
+    '================================================================',
+    '',
   ];
-  [...S.docs].sort((a,b) => a.n - b.n).forEach(d => {
-    lines.push(`--- FACTURA #${String(d.n).padStart(3,'0')} | ${fmtFull(d.ts)} ---`);
-    lines.push(d.raw);
-    lines.push('');
+
+  // Una línea por factura (formato compacto)
+  [...S.docs].sort((a, b) => a.n - b.n).forEach(d => {
+    lines.push(`[${String(d.n).padStart(3,'0')}] ${fmtFull(d.ts)} | ${d.raw}`);
   });
+
+  lines.push('');
+  lines.push('================================================================');
   lines.push('FIN DEL ARCHIVO');
-  dl(lines.join('\r\n'), `QR_Facturas_${fmtFile(now)}.txt`, 'text/plain');
+
+  dl(lines.join('\r\n'), `Facturas_${fmtFile(now)}.txt`, 'text/plain');
   toast('TXT descargado ✔');
 }
 
+// ── LIMPIAR TODO ────────────────────────────
 function clearAll() {
   if (!S.docs.length) { toast('Lista ya vacía', 'warn'); return; }
-  if (!confirm(`¿Borrar los ${S.docs.length} documentos?`)) return;
+  if (!confirm(`¿Borrar los ${S.docs.length} documentos registrados?`)) return;
   S.docs = []; S.seen.clear();
-  save(); refresh(); toast('Lista limpiada');
+  save(); refresh();
+  toast('Lista limpiada');
 }
 
-function setSt(type, msg) {
-  document.getElementById('dot').className    = 'dot ' + type;
-  document.getElementById('stxt').textContent = msg;
-}
-
+// ── HELPERS ─────────────────────────────────
 let tT;
-function toast(msg, type='') {
+function toast(msg, type = '') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast on ' + type;
-  clearTimeout(tT); tT = setTimeout(() => t.classList.remove('on'), 2400);
+  clearTimeout(tT); tT = setTimeout(() => t.classList.remove('on'), 2500);
 }
 
 function dl(content, name, mime) {
@@ -379,18 +435,24 @@ function fmt(d)     { return `${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.g
 function fmtFull(d) { return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${fmt(d)}`; }
 function fmtFile(d) { return `${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}_${p2(d.getHours())}${p2(d.getMinutes())}`; }
 
+// ── PERSISTENCIA ────────────────────────────
 function save() {
-  try { localStorage.setItem('qr_docs', JSON.stringify(S.docs.map(d => ({...d, ts: d.ts.toISOString()})))); } catch(e){}
+  try {
+    localStorage.setItem('qr_docs', JSON.stringify(
+      S.docs.map(d => ({ ...d, ts: d.ts.toISOString() }))
+    ));
+  } catch(e) {}
 }
 function load() {
   try {
     const r = localStorage.getItem('qr_docs');
     if (!r) return;
-    S.docs = JSON.parse(r).map(d => ({...d, ts: new Date(d.ts)}));
+    S.docs = JSON.parse(r).map(d => ({ ...d, ts: new Date(d.ts) }));
     S.seen = new Set(S.docs.map(d => d.raw));
     refresh();
-  } catch(e){}
+  } catch(e) {}
 }
+
 load();
 </script>
 </body>
