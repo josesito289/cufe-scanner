@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#060b18">
 <title>QR Facturas · DIAN</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
@@ -24,141 +23,60 @@
     --r:       14px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: var(--sans); min-height: 100dvh;
-    display: flex; flex-direction: column;
-  }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100dvh; display: flex; flex-direction: column; }
 
-  /* ── HEADER ── */
-  header {
-    padding: 14px 18px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 12px;
-  }
-  .logo {
-    width: 40px; height: 40px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--accent), #0055bb);
-    border-radius: 10px; display: grid; place-items: center;
-    font-family: var(--mono); font-size: 11px; font-weight: 700;
-    color: #000; box-shadow: 0 0 20px rgba(0,229,255,.3);
-  }
+  header { padding: 14px 18px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .logo { width: 40px; height: 40px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent), #0055bb); border-radius: 10px; display: grid; place-items: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: #000; box-shadow: 0 0 20px rgba(0,229,255,.3); }
   header h1 { font-size: 18px; font-weight: 800; line-height: 1; }
   header p  { font-size: 10px; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; margin-top: 3px; }
-  .hcount {
-    margin-left: auto;
-    background: rgba(0,229,255,.1); border: 1px solid rgba(0,229,255,.25);
-    border-radius: 20px; padding: 4px 14px;
-    font-family: var(--mono); font-size: 13px; font-weight: 700;
-    color: var(--accent);
-  }
+  .hcount { margin-left: auto; background: rgba(0,229,255,.1); border: 1px solid rgba(0,229,255,.25); border-radius: 20px; padding: 4px 14px; font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent); }
 
-  /* ── TABS ── */
   .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
   .tab  { flex: 1; padding: 10px 4px; background: none; border: none; cursor: pointer; font-family: var(--sans); font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .5px; position: relative; transition: color .2s; }
   .tab.on { color: var(--accent); }
   .tab.on::after { content: ''; position: absolute; bottom: 0; left: 10%; right: 10%; height: 2px; background: var(--accent); border-radius: 2px 2px 0 0; box-shadow: 0 0 8px var(--accent); }
   .ti { display: block; font-size: 18px; margin-bottom: 2px; }
 
-  /* ── PANELS ── */
   main { flex: 1; overflow-y: auto; }
   .panel { display: none; flex-direction: column; align-items: center; padding: 18px 16px; gap: 14px; }
   .panel.on { display: flex; }
 
-  /* ══════════════════════════════
-     PANEL PEGAR
-  ══════════════════════════════ */
+  /* ── INSTRUCCIONES ── */
+  .steps { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .step { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+  .step-n { width: 22px; height: 22px; flex-shrink: 0; background: rgba(0,229,255,.12); border: 1px solid rgba(0,229,255,.3); border-radius: 50%; display: grid; place-items: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent); }
 
-  /* Instrucción rápida */
-  .steps {
-    width: 100%; max-width: 400px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 14px 16px;
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .step {
-    display: flex; align-items: flex-start; gap: 10px;
-    font-size: 13px; line-height: 1.5; color: var(--muted);
-  }
-  .step-n {
-    width: 22px; height: 22px; flex-shrink: 0;
-    background: rgba(0,229,255,.12); border: 1px solid rgba(0,229,255,.3);
-    border-radius: 50%; display: grid; place-items: center;
-    font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent);
-  }
-
-  /* Área de pegado — GRANDE para dedos gordos */
+  /* ── ÁREA PEGADO ── */
   .paste-wrap { width: 100%; max-width: 400px; position: relative; }
-
-  #txt-input {
-    width: 100%; min-height: 130px;
-    background: var(--surface); border: 2px solid var(--border);
-    border-radius: var(--r); padding: 14px;
-    font-family: var(--mono); font-size: 12px; line-height: 1.7;
-    color: var(--text); resize: none;
-    transition: border-color .2s;
-    -webkit-appearance: none;
-  }
+  #txt-input { width: 100%; min-height: 130px; background: var(--surface); border: 2px solid var(--border); border-radius: var(--r); padding: 14px; font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--text); resize: none; transition: border-color .2s; -webkit-appearance: none; }
   #txt-input:focus { outline: none; border-color: var(--accent); }
   #txt-input::placeholder { color: var(--muted); }
-
-  /* Botón limpiar campo */
-  .clear-field {
-    position: absolute; top: 10px; right: 10px;
-    background: rgba(255,107,53,.15); border: 1px solid rgba(255,107,53,.3);
-    border-radius: 6px; padding: 4px 8px;
-    font-size: 11px; color: var(--err); cursor: pointer;
-    font-family: var(--mono); display: none;
-  }
+  .clear-field { position: absolute; top: 10px; right: 10px; background: rgba(255,107,53,.15); border: 1px solid rgba(255,107,53,.3); border-radius: 6px; padding: 4px 8px; font-size: 11px; color: var(--err); cursor: pointer; font-family: var(--mono); display: none; }
   .clear-field.on { display: block; }
 
-  /* Botón PEGAR del sistema */
-  .btn-paste-sys {
-    width: 100%; max-width: 400px;
-    padding: 14px; border: none; border-radius: var(--r);
-    background: var(--surface); color: var(--accent);
-    border: 1px dashed rgba(0,229,255,.4);
-    font-family: var(--sans); font-size: 14px; font-weight: 700;
-    cursor: pointer; transition: all .15s;
-    letter-spacing: .3px;
-  }
+  .btn-paste-sys { width: 100%; max-width: 400px; padding: 14px; border: none; border-radius: var(--r); background: var(--surface); color: var(--accent); border: 1px dashed rgba(0,229,255,.4); font-family: var(--sans); font-size: 14px; font-weight: 700; cursor: pointer; transition: all .15s; letter-spacing: .3px; }
   .btn-paste-sys:active { background: rgba(0,229,255,.08); transform: scale(.98); }
 
-  /* Botón GUARDAR — el más importante, enorme */
-  .btn-save {
-    width: 100%; max-width: 400px;
-    padding: 18px; border: none; border-radius: var(--r);
-    background: var(--ok); color: #000;
-    font-family: var(--sans); font-size: 17px; font-weight: 800;
-    cursor: pointer; letter-spacing: .5px;
-    box-shadow: 0 0 30px rgba(0,255,136,.35);
-    transition: transform .1s, background .1s;
-  }
+  /* ── PREVIEW — muestra CUFE y NumFac extraídos ── */
+  .preview-box { width: 100%; max-width: 400px; background: rgba(0,229,255,.04); border: 1px solid rgba(0,229,255,.15); border-radius: var(--r); padding: 13px 14px; display: none; gap: 8px; flex-direction: column; }
+  .preview-box.on { display: flex; }
+  .prev-label { font-size: 10px; letter-spacing: 2px; color: var(--accent); font-family: var(--mono); }
+  .prev-row { display: flex; flex-direction: column; gap: 3px; }
+  .prev-key { font-size: 10px; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; }
+  .prev-val { font-family: var(--mono); font-size: 12px; word-break: break-all; line-height: 1.6; color: var(--text); background: rgba(0,0,0,.3); padding: 6px 8px; border-radius: 6px; }
+  .prev-val.ok   { border-left: 3px solid var(--ok); }
+  .prev-val.warn { border-left: 3px solid var(--warn); color: var(--warn); }
+  .dup-badge { display: inline-block; background: rgba(255,204,0,.15); border: 1px solid var(--warn); border-radius: 6px; padding: 3px 10px; font-family: var(--mono); font-size: 10px; color: var(--warn); align-self: flex-start; }
+
+  /* ── BOTÓN GUARDAR ── */
+  .btn-save { width: 100%; max-width: 400px; padding: 18px; border: none; border-radius: var(--r); background: var(--ok); color: #000; font-family: var(--sans); font-size: 17px; font-weight: 800; cursor: pointer; letter-spacing: .5px; box-shadow: 0 0 30px rgba(0,255,136,.35); transition: transform .1s, background .1s; }
   .btn-save:active { transform: scale(.97); background: #00cc6e; }
 
-  /* Preview de lo que se va a guardar */
-  .preview-box {
-    width: 100%; max-width: 400px;
-    background: rgba(0,229,255,.04); border: 1px solid rgba(0,229,255,.15);
-    border-radius: var(--r); padding: 12px 14px;
-    display: none;
-  }
-  .preview-box.on { display: block; }
-  .prev-label { font-size: 10px; letter-spacing: 2px; color: var(--accent); font-family: var(--mono); margin-bottom: 6px; }
-  .prev-content { font-family: var(--mono); font-size: 11px; word-break: break-all; line-height: 1.75; color: var(--text); max-height: 100px; overflow: hidden; position: relative; }
-  .prev-content::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, rgba(6,11,24,.9)); }
-  .dup-badge { display: inline-block; margin-top: 6px; background: rgba(255,204,0,.15); border: 1px solid var(--warn); border-radius: 6px; padding: 3px 10px; font-family: var(--mono); font-size: 10px; color: var(--warn); }
-
-  /* ══════════════════════════════
-     PANEL LISTA
-  ══════════════════════════════ */
+  /* ── LISTA ── */
   #p-lista { padding: 14px 16px; gap: 12px; }
-
   .list-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .list-head h2 { font-size: 16px; font-weight: 800; }
   .badge { background: var(--accent); color: #000; border-radius: 20px; padding: 3px 13px; font-family: var(--mono); font-size: 12px; font-weight: 700; }
-
   .act-row { width: 100%; display: flex; gap: 8px; flex-wrap: wrap; }
   .abtn { padding: 11px 18px; border-radius: 9px; border: none; cursor: pointer; font-family: var(--sans); font-size: 13px; font-weight: 700; transition: transform .12s; }
   .abtn:active { transform: scale(.96); }
@@ -169,17 +87,18 @@
   .empty-ico { font-size: 48px; opacity: .3; }
 
   .qr-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
-
   .qr-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; animation: pop .2s ease; }
   @keyframes pop { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
-  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 7px; }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
   .card-num  { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 1px; }
   .card-time { font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
-  .card-body { font-family: var(--mono); font-size: 11px; word-break: break-all; line-height: 1.75; color: var(--text); background: rgba(0,0,0,.25); padding: 8px; border-radius: 6px; max-height: 100px; overflow-y: auto; }
+  .card-fields { display: flex; flex-direction: column; gap: 5px; }
+  .field-row { display: flex; flex-direction: column; gap: 2px; }
+  .field-key { font-size: 9px; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; }
+  .field-val { font-family: var(--mono); font-size: 11px; word-break: break-all; line-height: 1.6; color: var(--text); background: rgba(0,0,0,.2); padding: 5px 7px; border-radius: 5px; }
   .del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; flex-shrink: 0; line-height: 1; transition: color .15s; padding: 0 3px; }
   .del:active { color: var(--err); }
 
-  /* ── TOAST ── */
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ok); color: #000; border-radius: 28px; padding: 12px 26px; font-family: var(--sans); font-size: 14px; font-weight: 700; z-index: 999; pointer-events: none; opacity: 0; transition: opacity .2s; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
   .toast.on { opacity: 1; } .toast.warn { background: var(--warn); } .toast.err { background: var(--err); color: #fff; }
 </style>
@@ -206,57 +125,55 @@
   <section id="p-pegar" class="panel on">
 
     <div class="steps">
-      <div class="step"><div class="step-n">1</div><span>Escanea el QR con tu app de cámara o escáner QR</span></div>
-      <div class="step"><div class="step-n">2</div><span>Copia el texto que aparece (mantén presionado → Copiar)</span></div>
-      <div class="step"><div class="step-n">3</div><span>Pega aquí abajo y presiona <strong>GUARDAR</strong></span></div>
+      <div class="step"><div class="step-n">1</div><span>Escanea el QR con la cámara o app escáner</span></div>
+      <div class="step"><div class="step-n">2</div><span>Copia el texto completo (mantén presionado → Copiar)</span></div>
+      <div class="step"><div class="step-n">3</div><span>Pega aquí y presiona <strong>GUARDAR</strong></span></div>
     </div>
 
     <div class="paste-wrap">
       <textarea id="txt-input"
-        placeholder="Pega aquí el contenido del QR…&#10;&#10;Ejemplo:&#10;https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey=ABC123&cufe=a1b2c3..."
+        placeholder="Pega aquí el contenido del QR…"
         oninput="onInput()"
       ></textarea>
       <button class="clear-field" id="btn-clear-field" onclick="clearField()">✕ limpiar</button>
     </div>
 
-    <!-- Botón pegar del sistema (usa Clipboard API) -->
     <button class="btn-paste-sys" onclick="pasteFromClipboard()">
       📌 Pegar desde portapapeles
     </button>
 
-    <!-- Preview -->
+    <!-- Preview extraído -->
     <div class="preview-box" id="preview-box">
-      <div class="prev-label">VISTA PREVIA</div>
-      <div class="prev-content" id="prev-content"></div>
+      <div class="prev-label">DATOS EXTRAÍDOS</div>
+      <div class="prev-row">
+        <span class="prev-key">CUFE</span>
+        <span class="prev-val" id="prev-cufe">—</span>
+      </div>
+      <div class="prev-row">
+        <span class="prev-key">NumFac</span>
+        <span class="prev-val" id="prev-numfac">—</span>
+      </div>
       <span class="dup-badge" id="dup-badge" style="display:none">⚠ Ya registrado</span>
     </div>
 
-    <!-- BOTÓN PRINCIPAL -->
     <button class="btn-save" onclick="guardar()">✔ GUARDAR FACTURA</button>
 
   </section>
 
   <!-- ══ PANEL LISTA ══ -->
   <section id="p-lista" class="panel">
-
     <div class="list-head">
       <h2>Documentos registrados</h2>
       <span class="badge" id="cnt">0</span>
     </div>
-
     <div class="act-row">
       <button class="abtn dl"  onclick="exportTXT()">⬇ Descargar TXT</button>
       <button class="abtn clr" onclick="clearAll()">🗑 Limpiar todo</button>
     </div>
-
     <div style="width:100%">
-      <div class="empty" id="empty">
-        <div class="empty-ico">📭</div>
-        <p>Aún no has registrado<br>ninguna factura.</p>
-      </div>
+      <div class="empty" id="empty"><div class="empty-ico">📭</div><p>Aún no has registrado<br>ninguna factura.</p></div>
       <div class="qr-list" id="qr-list"></div>
     </div>
-
   </section>
 
 </main>
@@ -266,6 +183,28 @@
 <script>
 // ── ESTADO ──────────────────────────────────
 const S = { docs: [], seen: new Set() };
+
+// ── EXTRACCIÓN CUFE + NumFac ─────────────────
+// Lógica: primero busca etiqueta CUFE:, si no hay busca documentkey=
+// Para NumFac: busca la etiqueta NumFac:
+function extraer(raw) {
+  // CUFE — etiqueta explícita primero, luego documentkey
+  let cufe = null;
+  const m1 = raw.match(/CUFE\s*:\s*([a-fA-F0-9]{60,100})/i);
+  if (m1) {
+    cufe = m1[1].trim();
+  } else {
+    const m2 = raw.match(/documentkey=([a-fA-F0-9]{60,100})/i);
+    if (m2) cufe = m2[1].trim();
+  }
+
+  // NumFac
+  let numfac = null;
+  const m3 = raw.match(/NumFac\s*:\s*(\S+)/i);
+  if (m3) numfac = m3[1].trim();
+
+  return { cufe, numfac };
+}
 
 // ── TABS ────────────────────────────────────
 function goTab(name, btn) {
@@ -277,22 +216,25 @@ function goTab(name, btn) {
 
 // ── INPUT / PREVIEW ─────────────────────────
 function onInput() {
-  const val = document.getElementById('txt-input').value.trim();
-  const clearBtn  = document.getElementById('btn-clear-field');
-  const preBox    = document.getElementById('preview-box');
-  const preCont   = document.getElementById('prev-content');
-  const dupBadge  = document.getElementById('dup-badge');
+  const raw = document.getElementById('txt-input').value.trim();
+  document.getElementById('btn-clear-field').classList.toggle('on', raw.length > 0);
 
-  clearBtn.classList.toggle('on', val.length > 0);
+  if (!raw) { document.getElementById('preview-box').classList.remove('on'); return; }
 
-  if (val.length === 0) {
-    preBox.classList.remove('on');
-    return;
-  }
+  const { cufe, numfac } = extraer(raw);
+  const cEl = document.getElementById('prev-cufe');
+  const nEl = document.getElementById('prev-numfac');
 
-  preCont.textContent = val;
-  dupBadge.style.display = S.seen.has(val) ? 'inline-block' : 'none';
-  preBox.classList.add('on');
+  cEl.textContent = cufe   || '— No detectado';
+  nEl.textContent = numfac || '— No detectado';
+  cEl.className   = 'prev-val ' + (cufe   ? 'ok' : 'warn');
+  nEl.className   = 'prev-val ' + (numfac ? 'ok' : 'warn');
+
+  // Anti-dup por CUFE
+  document.getElementById('dup-badge').style.display =
+    (cufe && S.seen.has(cufe)) ? 'inline-block' : 'none';
+
+  document.getElementById('preview-box').classList.add('on');
 }
 
 function clearField() {
@@ -309,7 +251,6 @@ async function pasteFromClipboard() {
     onInput();
     toast('Pegado ✔');
   } catch(e) {
-    // Fallback: enfocar el textarea para que el usuario pegue manualmente
     document.getElementById('txt-input').focus();
     toast('Mantén presionado el campo y elige Pegar', 'warn');
   }
@@ -318,42 +259,39 @@ async function pasteFromClipboard() {
 // ── GUARDAR ─────────────────────────────────
 function guardar() {
   const raw = document.getElementById('txt-input').value.trim();
+  if (!raw) { toast('El campo está vacío', 'err'); return; }
 
-  if (!raw) {
-    toast('El campo está vacío', 'err');
-    document.getElementById('txt-input').focus();
+  const { cufe, numfac } = extraer(raw);
+
+  if (!cufe) {
+    toast('No se encontró CUFE en el texto', 'err');
     return;
   }
 
-  if (S.seen.has(raw)) {
+  if (S.seen.has(cufe)) {
     toast('Esta factura ya está registrada', 'warn');
     return;
   }
 
-  const doc = { raw, ts: new Date(), n: S.docs.length + 1 };
+  const doc = { raw, cufe, numfac: numfac || '—', ts: new Date(), n: S.docs.length + 1 };
   S.docs.unshift(doc);
-  S.seen.add(raw);
+  S.seen.add(cufe);
 
-  // Limpiar campo para la siguiente
   clearField();
-
   save();
   refresh();
   toast(`Factura #${doc.n} guardada ✔`);
-
-  // Actualizar contador del header
   document.getElementById('hcount').textContent = S.docs.length;
 }
 
 // ── RENDER LISTA ────────────────────────────
 function refresh() {
-  const n     = S.docs.length;
-  const empty = document.getElementById('empty');
-  const list  = document.getElementById('qr-list');
-
+  const n = S.docs.length;
   document.getElementById('cnt').textContent    = n;
   document.getElementById('hcount').textContent = n;
 
+  const empty = document.getElementById('empty');
+  const list  = document.getElementById('qr-list');
   if (n === 0) { empty.style.display = 'flex'; list.innerHTML = ''; return; }
   empty.style.display = 'none';
 
@@ -364,51 +302,62 @@ function refresh() {
         <span class="card-time">${fmtFull(d.ts)}</span>
         <button class="del" onclick="del(${d.n})">✕</button>
       </div>
-      <div class="card-body">${esc(d.raw)}</div>
+      <div class="card-fields">
+        <div class="field-row">
+          <span class="field-key">NumFac</span>
+          <span class="field-val">${esc(d.numfac)}</span>
+        </div>
+        <div class="field-row">
+          <span class="field-key">CUFE</span>
+          <span class="field-val">${esc(d.cufe)}</span>
+        </div>
+      </div>
     </div>`).join('');
 }
 
 function del(n) {
+  const doc = S.docs.find(d => d.n === n);
+  if (doc) S.seen.delete(doc.cufe);
   S.docs = S.docs.filter(d => d.n !== n);
-  S.seen = new Set(S.docs.map(d => d.raw));
   save(); refresh();
 }
 
 // ── EXPORTAR TXT ────────────────────────────
+// Formato: Factura N  [TAB]  CUFE  [TAB]  NumFac
 function exportTXT() {
   if (!S.docs.length) { toast('Nada que exportar', 'warn'); return; }
 
   const now = new Date();
   const lines = [
     '================================================================',
-    '       REGISTRO QR — FACTURAS ELECTRÓNICAS DIAN',
+    '         RESUMEN CUFEs — FACTURAS ELECTRÓNICAS DIAN',
     '================================================================',
     `Generado : ${fmtFull(now)}`,
-    `Total    : ${S.docs.length} documento(s)`,
+    `Total    : ${S.docs.length} factura(s)`,
     '================================================================',
     '',
+    'Factura\t\tCUFE\t\t\t\t\t\t\t\t\t\t\t\tNumFac',
+    '-'.repeat(130),
   ];
 
-  // Una línea por factura (formato compacto)
   [...S.docs].sort((a, b) => a.n - b.n).forEach(d => {
-    lines.push(`[${String(d.n).padStart(3,'0')}] ${fmtFull(d.ts)} | ${d.raw}`);
+    lines.push(`Factura ${d.n}\t${d.cufe}\t${d.numfac}`);
   });
 
   lines.push('');
   lines.push('================================================================');
   lines.push('FIN DEL ARCHIVO');
 
-  dl(lines.join('\r\n'), `Facturas_${fmtFile(now)}.txt`, 'text/plain');
+  dl(lines.join('\r\n'), `CUFE_Facturas_${fmtFile(now)}.txt`, 'text/plain');
   toast('TXT descargado ✔');
 }
 
 // ── LIMPIAR TODO ────────────────────────────
 function clearAll() {
   if (!S.docs.length) { toast('Lista ya vacía', 'warn'); return; }
-  if (!confirm(`¿Borrar los ${S.docs.length} documentos registrados?`)) return;
+  if (!confirm(`¿Borrar los ${S.docs.length} documentos?`)) return;
   S.docs = []; S.seen.clear();
-  save(); refresh();
-  toast('Lista limpiada');
+  save(); refresh(); toast('Lista limpiada');
 }
 
 // ── HELPERS ─────────────────────────────────
@@ -429,7 +378,7 @@ function dl(content, name, mime) {
   setTimeout(() => URL.revokeObjectURL(u), 3000);
 }
 
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 const p2 = n => String(n).padStart(2,'0');
 function fmt(d)     { return `${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`; }
 function fmtFull(d) { return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${fmt(d)}`; }
@@ -448,7 +397,7 @@ function load() {
     const r = localStorage.getItem('qr_docs');
     if (!r) return;
     S.docs = JSON.parse(r).map(d => ({ ...d, ts: new Date(d.ts) }));
-    S.seen = new Set(S.docs.map(d => d.raw));
+    S.seen = new Set(S.docs.map(d => d.cufe).filter(Boolean));
     refresh();
   } catch(e) {}
 }
