@@ -5,28 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0f1e">
-<title>CUFE Scanner · Colombia</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#060b18">
+<title>QR Scanner · Facturas</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <style>
   :root {
-    --bg:       #060b18;
-    --surface:  #0d1528;
-    --border:   #1a2a4a;
-    --accent:   #00e5ff;
-    --accent2:  #ff6b35;
-    --success:  #00ff88;
-    --warn:     #ffcc00;
-    --text:     #e8f4ff;
-    --muted:    #5a7a9a;
-    --radius:   12px;
-    --mono:     'Space Mono', monospace;
-    --sans:     'Syne', sans-serif;
+    --bg:      #060b18;
+    --surface: #0d1528;
+    --border:  #1a2a4a;
+    --accent:  #00e5ff;
+    --ok:      #00ff88;
+    --warn:    #ffcc00;
+    --err:     #ff6b35;
+    --text:    #e8f4ff;
+    --muted:   #5a7a9a;
+    --mono:    'Space Mono', monospace;
+    --sans:    'Syne', sans-serif;
+    --r:       12px;
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
@@ -36,473 +33,316 @@
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden;
   }
 
-  /* ── RUIDO DE FONDO ── */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 0;
-  }
-
+  /* ── HEADER ── */
   header {
-    position: relative; z-index: 10;
-    padding: 18px 20px 12px;
+    padding: 16px 18px;
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(135deg, #0d1528 0%, #081020 100%);
-    display: flex; align-items: center; gap: 14px;
+    display: flex; align-items: center; gap: 12px;
   }
-
-  .logo-mark {
-    width: 40px; height: 40px; flex-shrink: 0;
+  .logo {
+    width: 38px; height: 38px;
     background: linear-gradient(135deg, var(--accent), #0066cc);
-    border-radius: 10px;
+    border-radius: 9px;
     display: grid; place-items: center;
-    font-family: var(--mono); font-size: 13px; font-weight: 700;
-    color: #000; letter-spacing: -1px;
-    box-shadow: 0 0 20px rgba(0,229,255,0.3);
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+    color: #000; flex-shrink: 0;
+    box-shadow: 0 0 18px rgba(0,229,255,.25);
   }
-
-  .header-text h1 {
-    font-size: 18px; font-weight: 800; letter-spacing: -0.5px;
-    line-height: 1;
-  }
-  .header-text span {
-    font-size: 11px; color: var(--muted);
-    font-family: var(--mono); letter-spacing: 1px;
-  }
-
-  .badge-dian {
-    margin-left: auto;
-    background: rgba(0,229,255,0.08);
-    border: 1px solid rgba(0,229,255,0.25);
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-family: var(--mono); font-size: 10px;
-    color: var(--accent); letter-spacing: 1px;
-  }
+  header h1 { font-size: 17px; font-weight: 800; line-height: 1; }
+  header p  { font-size: 10px; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; margin-top: 2px; }
 
   /* ── TABS ── */
   .tabs {
-    display: flex; position: relative; z-index: 10;
+    display: flex;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
   }
-  .tab-btn {
-    flex: 1; padding: 12px 8px;
+  .tab {
+    flex: 1; padding: 11px 4px;
     background: none; border: none; cursor: pointer;
-    font-family: var(--sans); font-size: 13px; font-weight: 700;
-    color: var(--muted); letter-spacing: 0.5px;
-    transition: all .2s; position: relative;
+    font-family: var(--sans); font-size: 12px; font-weight: 700;
+    color: var(--muted); letter-spacing: .5px;
+    position: relative; transition: color .2s;
   }
-  .tab-btn.active { color: var(--accent); }
-  .tab-btn.active::after {
+  .tab.on { color: var(--accent); }
+  .tab.on::after {
     content: '';
-    position: absolute; bottom: 0; left: 10%; right: 10%; height: 2px;
-    background: var(--accent);
-    border-radius: 2px 2px 0 0;
+    position: absolute; bottom: 0; left: 12%; right: 12%; height: 2px;
+    background: var(--accent); border-radius: 2px 2px 0 0;
     box-shadow: 0 0 8px var(--accent);
   }
-  .tab-icon { display: block; font-size: 18px; margin-bottom: 2px; }
+  .tab-icon { display: block; font-size: 17px; margin-bottom: 2px; }
 
-  /* ── MAIN ── */
-  main { flex: 1; position: relative; z-index: 5; }
-  .panel { display: none; }
-  .panel.active { display: flex; flex-direction: column; }
+  /* ── PANELS ── */
+  main { flex: 1; }
+  .panel { display: none; flex-direction: column; align-items: center; padding: 18px 14px; gap: 14px; }
+  .panel.on { display: flex; }
 
-  /* ── SCANNER PANEL ── */
-  #panel-scanner {
-    align-items: center;
-    padding: 20px 16px;
-    gap: 16px;
-  }
-
-  .scanner-frame {
+  /* ── VISOR CÁMARA ── */
+  .cam-wrap {
     position: relative;
     width: 100%; max-width: 340px;
     aspect-ratio: 1;
-    border-radius: var(--radius);
+    border-radius: var(--r);
     overflow: hidden;
     border: 2px solid var(--border);
     background: #000;
-    box-shadow: 0 0 40px rgba(0,229,255,0.1);
+    box-shadow: 0 0 30px rgba(0,229,255,.08);
   }
+  #video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  #video {
-    width: 100%; height: 100%;
-    object-fit: cover; display: block;
-  }
-
-  /* Esquinas del visor */
   .corner {
-    position: absolute;
-    width: 28px; height: 28px;
-    border-color: var(--accent);
-    border-style: solid;
-    z-index: 2;
+    position: absolute; width: 26px; height: 26px;
+    border-color: var(--accent); border-style: solid; z-index: 2;
   }
-  .corner.tl { top: 12px; left: 12px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
-  .corner.tr { top: 12px; right: 12px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
-  .corner.bl { bottom: 12px; left: 12px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
-  .corner.br { bottom: 12px; right: 12px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+  .tl { top:10px; left:10px;  border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+  .tr { top:10px; right:10px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+  .bl { bottom:10px; left:10px;  border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+  .br { bottom:10px; right:10px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
 
-  /* Línea de escaneo */
-  .scan-line {
-    position: absolute;
-    left: 14px; right: 14px; height: 2px;
+  .scanline {
+    position: absolute; left: 12px; right: 12px; height: 2px;
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    box-shadow: 0 0 8px var(--accent);
-    z-index: 3;
-    animation: scan 2.5s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--accent); z-index: 3;
+    animation: sweep 2.4s ease-in-out infinite;
   }
-  @keyframes scan {
-    0%   { top: 14px; opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 1; }
-    100% { top: calc(100% - 14px); opacity: 0; }
-  }
-
-  .scan-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom,
-      rgba(0,0,0,0.3) 0%, transparent 30%,
-      transparent 70%, rgba(0,0,0,0.3) 100%);
-    z-index: 1;
+  @keyframes sweep {
+    0%   { top: 12px; opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { top: calc(100% - 12px); opacity: 0; }
   }
 
-  /* Flash de éxito */
-  .success-flash {
-    position: absolute; inset: 0;
-    background: rgba(0,255,136,0.25);
-    z-index: 4; opacity: 0; pointer-events: none;
-    transition: opacity .1s;
+  .flash {
+    position: absolute; inset: 0; z-index: 4;
+    background: rgba(0,255,136,.22); opacity: 0;
+    pointer-events: none; transition: opacity .08s;
     border-radius: 10px;
   }
-  .success-flash.show { opacity: 1; }
+  .flash.go { opacity: 1; }
 
-  canvas#qr-canvas { display: none; }
+  canvas { display: none; }
 
   /* ── STATUS ── */
-  .status-bar {
+  .status {
     width: 100%; max-width: 340px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 16px;
+    border-radius: var(--r);
+    padding: 11px 14px;
     display: flex; align-items: center; gap: 10px;
     font-family: var(--mono); font-size: 12px;
   }
-  .status-dot {
+  .dot {
     width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-    background: var(--muted);
-    transition: background .3s;
+    background: var(--muted); transition: background .3s;
   }
-  .status-dot.scanning { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 1s infinite; }
-  .status-dot.ok       { background: var(--success); box-shadow: 0 0 6px var(--success); }
-  .status-dot.dup      { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
-  .status-dot.err      { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .dot.scan { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: blink 1s infinite; }
+  .dot.ok   { background: var(--ok);   box-shadow: 0 0 6px var(--ok); }
+  .dot.dup  { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+  .dot.err  { background: var(--err);  box-shadow: 0 0 6px var(--err); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-  #status-text { flex: 1; color: var(--text); }
-
-  /* ── LAST CUFE ── */
-  .last-cufe-box {
+  /* ── ÚLTIMO QR ── */
+  .last-box {
     width: 100%; max-width: 340px;
-    background: rgba(0,229,255,0.05);
-    border: 1px solid rgba(0,229,255,0.2);
-    border-radius: var(--radius);
-    padding: 14px;
+    background: rgba(0,229,255,.05);
+    border: 1px solid rgba(0,229,255,.2);
+    border-radius: var(--r);
+    padding: 13px;
     display: none;
   }
-  .last-cufe-box.show { display: block; }
-  .last-cufe-label {
-    font-size: 10px; letter-spacing: 2px; color: var(--accent);
-    font-family: var(--mono); margin-bottom: 6px;
+  .last-box.on { display: block; }
+  .last-label {
+    font-size: 10px; letter-spacing: 2px;
+    color: var(--accent); font-family: var(--mono); margin-bottom: 7px;
   }
-  .last-cufe-val {
+  .last-content {
     font-family: var(--mono); font-size: 11px;
-    word-break: break-all; line-height: 1.6;
+    word-break: break-all; line-height: 1.75;
     color: var(--text);
+    max-height: 160px; overflow-y: auto;
+    background: rgba(0,0,0,.3);
+    padding: 8px; border-radius: 6px;
   }
   .last-meta {
-    margin-top: 8px; font-size: 10px; color: var(--muted);
-    font-family: var(--mono);
+    margin-top: 7px; font-size: 10px;
+    color: var(--muted); font-family: var(--mono);
   }
 
-  /* ── CONTROLES ── */
-  .controls { width: 100%; max-width: 340px; display: flex; gap: 10px; }
-
+  /* ── BOTONES ── */
+  .row { width: 100%; max-width: 340px; display: flex; gap: 10px; }
   .btn {
-    flex: 1; padding: 13px 10px;
-    border: none; border-radius: var(--radius);
-    font-family: var(--sans); font-size: 14px; font-weight: 700;
-    cursor: pointer; transition: all .15s; letter-spacing: 0.3px;
+    flex: 1; padding: 13px 8px; border: none; border-radius: var(--r);
+    font-family: var(--sans); font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: transform .12s, background .12s;
   }
-  .btn-primary {
-    background: var(--accent); color: #000;
-    box-shadow: 0 0 20px rgba(0,229,255,0.3);
-  }
-  .btn-primary:active { transform: scale(.97); background: #00b8cc; }
-  .btn-primary:disabled { background: var(--border); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+  .btn:active { transform: scale(.96); }
+  .btn-p { background: var(--accent); color: #000; box-shadow: 0 0 18px rgba(0,229,255,.28); }
+  .btn-p:disabled { background: var(--border); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+  .btn-s { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
 
-  .btn-secondary {
-    background: var(--surface); color: var(--text);
-    border: 1px solid var(--border);
-  }
-  .btn-secondary:active { transform: scale(.97); }
+  /* ── PANEL LISTA ── */
+  #p-lista { padding: 14px; gap: 11px; }
 
-  /* ── LISTA PANEL ── */
-  #panel-lista { padding: 16px; gap: 12px; }
-
-  .lista-header {
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 8px;
+  .list-head {
+    width: 100%; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 8px;
   }
-  .lista-header h2 { font-size: 16px; font-weight: 800; }
-  .counter-badge {
+  .list-head h2 { font-size: 15px; font-weight: 800; }
+  .badge {
     background: var(--accent); color: #000;
     border-radius: 20px; padding: 3px 12px;
     font-family: var(--mono); font-size: 12px; font-weight: 700;
   }
 
-  .action-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .act-row { width: 100%; display: flex; gap: 8px; flex-wrap: wrap; }
+  .abtn {
+    padding: 10px 16px; border-radius: 8px; border: none;
+    cursor: pointer; font-family: var(--sans);
+    font-size: 13px; font-weight: 700; transition: transform .12s;
+  }
+  .abtn:active { transform: scale(.96); }
+  .abtn.dl  { background: var(--ok);   color: #000; box-shadow: 0 0 14px rgba(0,255,136,.28); }
+  .abtn.clr { background: var(--surface); color: var(--err); border: 1px solid var(--err); }
 
-  .btn-export {
-    padding: 10px 16px;
-    border-radius: 8px; border: none; cursor: pointer;
-    font-family: var(--sans); font-size: 13px; font-weight: 700;
-    transition: all .15s;
+  .empty {
+    width: 100%; padding: 50px 0;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+    color: var(--muted); text-align: center;
+    font-size: 13px; line-height: 1.6;
   }
-  .btn-export.txt {
-    background: var(--success); color: #000;
-    box-shadow: 0 0 15px rgba(0,255,136,0.3);
-  }
-  .btn-export.csv {
-    background: var(--warn); color: #000;
-    box-shadow: 0 0 15px rgba(255,204,0,0.3);
-  }
-  .btn-export.clear {
-    background: var(--surface); color: var(--accent2);
-    border: 1px solid var(--accent2);
-  }
-  .btn-export:active { transform: scale(.97); }
+  .empty-ico { font-size: 44px; opacity: .35; }
 
-  .empty-state {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 12px; text-align: center; padding: 40px 0;
-    color: var(--muted);
-  }
-  .empty-icon { font-size: 48px; opacity: .4; }
-  .empty-state p { font-size: 14px; line-height: 1.6; }
+  .qr-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 
-  .cufe-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-
-  .cufe-card {
+  .qr-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    animation: slideIn .25s ease;
+    border-radius: var(--r);
+    padding: 12px 13px;
+    animation: pop .22s ease;
   }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-8px); }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(-6px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-
-  .card-header {
+  .card-top {
     display: flex; align-items: flex-start;
-    justify-content: space-between; gap: 8px; margin-bottom: 6px;
+    justify-content: space-between; gap: 6px; margin-bottom: 7px;
   }
-  .card-num {
-    font-family: var(--mono); font-size: 10px;
-    color: var(--accent); letter-spacing: 1px;
-  }
-  .card-time {
-    font-family: var(--mono); font-size: 10px; color: var(--muted);
-    white-space: nowrap;
-  }
-  .card-cufe {
+  .card-num  { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 1px; }
+  .card-time { font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
+  .card-body {
     font-family: var(--mono); font-size: 11px;
-    word-break: break-all; line-height: 1.6; color: var(--text);
+    word-break: break-all; line-height: 1.75;
+    color: var(--text);
+    background: rgba(0,0,0,.25);
+    padding: 8px; border-radius: 6px;
+    max-height: 120px; overflow-y: auto;
   }
-  .card-meta {
-    margin-top: 6px; font-size: 10px; color: var(--muted);
-    font-family: var(--mono);
-  }
-  .delete-btn {
+  .del {
     background: none; border: none; cursor: pointer;
-    color: var(--muted); font-size: 16px; padding: 0 2px;
-    line-height: 1; flex-shrink: 0;
-    transition: color .15s;
+    color: var(--muted); font-size: 15px; flex-shrink: 0;
+    line-height: 1; transition: color .15s; padding: 0 2px;
   }
-  .delete-btn:active { color: var(--accent2); }
+  .del:active { color: var(--err); }
 
   /* ── TOAST ── */
   .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--success); color: #000;
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    background: var(--ok); color: #000;
     border-radius: 24px; padding: 10px 22px;
-    font-family: var(--sans); font-size: 14px; font-weight: 700;
+    font-family: var(--sans); font-size: 13px; font-weight: 700;
     z-index: 999; pointer-events: none;
-    opacity: 0; transition: opacity .2s;
-    white-space: nowrap;
+    opacity: 0; transition: opacity .2s; white-space: nowrap;
   }
-  .toast.show { opacity: 1; }
+  .toast.on   { opacity: 1; }
   .toast.warn { background: var(--warn); }
-  .toast.err  { background: var(--accent2); color: #fff; }
-
-  /* ── SOBRE PANEL ── */
-  #panel-sobre { padding: 24px 20px; gap: 20px; }
-  #panel-sobre h2 { font-size: 18px; font-weight: 800; }
-  .info-block {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
-  }
-  .info-block h3 {
-    font-size: 13px; font-weight: 700; color: var(--accent);
-    letter-spacing: 1px; font-family: var(--mono); margin-bottom: 8px;
-  }
-  .info-block p, .info-block li {
-    font-size: 13px; line-height: 1.7; color: var(--muted);
-  }
-  .info-block ul { padding-left: 16px; }
-  .info-block li { margin-bottom: 4px; }
-  .cufe-anatomy {
-    font-family: var(--mono); font-size: 10px;
-    background: #000; border-radius: 8px; padding: 10px;
-    word-break: break-all; line-height: 1.8; margin-top: 8px;
-  }
-  .cufe-anatomy .part { color: var(--accent2); }
-  .cufe-anatomy .sep  { color: var(--muted); }
-  .cufe-anatomy .hash { color: var(--success); }
+  .toast.err  { background: var(--err); color: #fff; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo-mark">QR</div>
-  <div class="header-text">
-    <h1>CUFE Scanner</h1>
-    <span>FACTURACIÓN ELECTRÓNICA · DIAN</span>
+  <div class="logo">QR</div>
+  <div>
+    <h1>QR Scanner</h1>
+    <p>FACTURAS ELECTRÓNICAS · DIAN</p>
   </div>
-  <div class="badge-dian">COL</div>
 </header>
 
 <nav class="tabs">
-  <button class="tab-btn active" onclick="switchTab('scanner', this)">
+  <button class="tab on" onclick="goTab('scan',this)">
     <span class="tab-icon">📷</span>ESCANEAR
   </button>
-  <button class="tab-btn" onclick="switchTab('lista', this)">
+  <button class="tab" onclick="goTab('lista',this)">
     <span class="tab-icon">📋</span>LISTA
-  </button>
-  <button class="tab-btn" onclick="switchTab('sobre', this)">
-    <span class="tab-icon">ℹ️</span>SOBRE
   </button>
 </nav>
 
 <main>
 
-  <!-- ═══════════════════ PANEL SCANNER ═══════════════════ -->
-  <section id="panel-scanner" class="panel active">
+  <!-- ══ PANEL ESCANEAR ══ -->
+  <section id="p-scan" class="panel on">
 
-    <div class="scanner-frame">
+    <div class="cam-wrap">
       <video id="video" autoplay muted playsinline></video>
-      <div class="scan-overlay"></div>
       <div class="corner tl"></div>
       <div class="corner tr"></div>
       <div class="corner bl"></div>
       <div class="corner br"></div>
-      <div class="scan-line"></div>
-      <div class="success-flash" id="flash"></div>
+      <div class="scanline"></div>
+      <div class="flash" id="flash"></div>
     </div>
 
-    <canvas id="qr-canvas"></canvas>
+    <canvas id="cv"></canvas>
 
-    <div class="status-bar">
-      <div class="status-dot" id="status-dot"></div>
-      <span id="status-text">Presiona INICIAR cámara</span>
+    <div class="status">
+      <div class="dot" id="dot"></div>
+      <span id="stxt">Presiona INICIAR</span>
     </div>
 
-    <div class="last-cufe-box" id="last-box">
-      <div class="last-cufe-label">ÚLTIMO CUFE DETECTADO</div>
-      <div class="last-cufe-val" id="last-cufe">—</div>
+    <div class="last-box" id="last-box">
+      <div class="last-label">ÚLTIMO QR ESCANEADO</div>
+      <div class="last-content" id="last-content"></div>
       <div class="last-meta" id="last-meta"></div>
     </div>
 
-    <div class="controls">
-      <button class="btn btn-primary" id="btn-camara" onclick="toggleCamera()">
-        📷 INICIAR
-      </button>
-      <button class="btn btn-secondary" onclick="switchTab('lista', document.querySelectorAll('.tab-btn')[1])">
+    <div class="row">
+      <button class="btn btn-p" id="btn-cam" onclick="toggleCam()">📷 INICIAR</button>
+      <button class="btn btn-s" onclick="goTab('lista', document.querySelectorAll('.tab')[1])">
         📋 Ver lista
       </button>
     </div>
 
   </section>
 
-  <!-- ═══════════════════ PANEL LISTA ═══════════════════ -->
-  <section id="panel-lista" class="panel">
+  <!-- ══ PANEL LISTA ══ -->
+  <section id="p-lista" class="panel">
 
-    <div class="lista-header">
+    <div class="list-head">
       <h2>Documentos escaneados</h2>
-      <span class="counter-badge" id="counter">0</span>
+      <span class="badge" id="cnt">0</span>
     </div>
 
-    <div class="action-row">
-      <button class="btn-export txt" onclick="exportTXT()">⬇ TXT</button>
-      <button class="btn-export csv" onclick="exportCSV()">⬇ CSV</button>
-      <button class="btn-export clear" onclick="clearAll()">🗑 Limpiar</button>
+    <div class="act-row">
+      <button class="abtn dl"  onclick="exportTXT()">⬇ Descargar TXT</button>
+      <button class="abtn clr" onclick="clearAll()">🗑 Limpiar</button>
     </div>
 
-    <div id="list-container">
-      <div class="empty-state" id="empty">
-        <div class="empty-icon">📭</div>
+    <div id="list-wrap" style="width:100%">
+      <div class="empty" id="empty">
+        <div class="empty-ico">📭</div>
         <p>Aún no has escaneado<br>ninguna factura.</p>
       </div>
-      <div class="cufe-list" id="cufe-list"></div>
+      <div class="qr-list" id="qr-list"></div>
     </div>
 
-  </section>
-
-  <!-- ═══════════════════ PANEL SOBRE ═══════════════════ -->
-  <section id="panel-sobre" class="panel">
-    <h2>¿Qué es el CUFE?</h2>
-
-    <div class="info-block">
-      <h3>DEFINICIÓN</h3>
-      <p>El <strong>Código Único de Factura Electrónica (CUFE)</strong> es el identificador generado por la DIAN para cada documento fiscal electrónico emitido en Colombia. Es obligatorio según la Resolución 000042 de 2020 y sus modificaciones.</p>
-    </div>
-
-    <div class="info-block">
-      <h3>ANATOMÍA DEL CUFE (96 caracteres hex)</h3>
-      <div class="cufe-anatomy">
-        <span class="part">NumFac</span><span class="sep">+</span><span class="part">FecFac</span><span class="sep">+</span><span class="part">ValFac</span><span class="sep">+</span><span class="part">CodImp1</span><span class="sep">+</span><span class="part">ValImp1</span><span class="sep">+</span><span class="part">CodImp2</span><span class="sep">+</span><span class="part">ValImp2</span><span class="sep">+</span><span class="part">CodImp3</span><span class="sep">+</span><span class="part">ValImp3</span><span class="sep">+</span><span class="part">ValTot</span><span class="sep">+</span><span class="part">NitOFE</span><span class="sep">+</span><span class="part">NumAdq</span><span class="sep">+</span><span class="part">ClTec</span><br>
-        → <span class="hash">SHA-384 → 96 chars hexadecimales</span>
-      </div>
-    </div>
-
-    <div class="info-block">
-      <h3>CÓMO FUNCIONA ESTA APP</h3>
-      <ul>
-        <li>Lee el QR de la factura electrónica DIAN</li>
-        <li>Extrae la URL con parámetros</li>
-        <li>Localiza el parámetro <code>cufe=</code> o la cadena hexadecimal de 96 chars</li>
-        <li>Guarda en memoria y permite exportar TXT/CSV</li>
-        <li>Sin instalación · Sin internet · Sin servidor</li>
-      </ul>
-    </div>
-
-    <div class="info-block">
-      <h3>REQUISITOS</h3>
-      <ul>
-        <li>Chrome o Samsung Internet en Android</li>
-        <li>Permitir acceso a cámara cuando lo solicite</li>
-        <li>Abrir como archivo local (file://) o desde servidor web</li>
-      </ul>
-    </div>
   </section>
 
 </main>
@@ -510,392 +350,251 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════
-//  ESTADO GLOBAL
-// ══════════════════════════════════════════════
-const state = {
-  scanning:  false,
-  stream:    null,
-  animFrame: null,
-  docs:      [],          // { cufe, url, ts, idx }
-  seen:      new Set(),   // CUFEs ya vistos (anti-dup)
-  cooldown:  false,       // pausa tras detección
+// ── ESTADO ──────────────────────────────────────
+const S = {
+  on:      false,
+  stream:  null,
+  raf:     null,
+  docs:    [],        // { raw, ts, n }
+  seen:    new Set(), // anti-duplicados
+  cool:    false,
 };
 
-// ══════════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════════
-function switchTab(name, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  btn.classList.add('active');
+// ── TABS ────────────────────────────────────────
+function goTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('p-' + name).classList.add('on');
+  btn.classList.add('on');
 }
 
-// ══════════════════════════════════════════════
-//  CÁMARA
-// ══════════════════════════════════════════════
-async function toggleCamera() {
-  if (state.scanning) {
-    stopCamera();
-  } else {
-    await startCamera();
-  }
+// ── CÁMARA ──────────────────────────────────────
+async function toggleCam() {
+  S.on ? stopCam() : await startCam();
 }
 
-async function startCamera() {
-  const btn = document.getElementById('btn-camara');
-  setStatus('idle', 'Solicitando cámara…');
-
-  const constraints = {
-    video: {
-      facingMode: { ideal: 'environment' },
-      width:  { ideal: 1280 },
-      height: { ideal: 720 },
-    }
-  };
-
+async function startCam() {
+  setSt('scan', 'Solicitando cámara…');
   try {
-    state.stream = await navigator.mediaDevices.getUserMedia(constraints);
-  } catch (e) {
-    // Fallback: cualquier cámara disponible
-    try {
-      state.stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    } catch (e2) {
-      setStatus('err', 'Cámara denegada. Revisa permisos en Chrome.');
-      showToast('Permiso de cámara denegado', 'err');
-      return;
+    S.stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }
+    });
+  } catch {
+    try { S.stream = await navigator.mediaDevices.getUserMedia({ video: true }); }
+    catch {
+      setSt('err', 'Cámara denegada — revisa permisos en Chrome');
+      toast('Permiso denegado', 'err'); return;
     }
   }
-
-  const video = document.getElementById('video');
-  video.srcObject = state.stream;
-  await video.play().catch(() => {});
-
-  state.scanning = true;
-  btn.textContent = '⏹ DETENER';
-  setStatus('scanning', 'Escaneando — apunta al QR…');
-
-  scanLoop();
+  const v = document.getElementById('video');
+  v.srcObject = S.stream;
+  await v.play().catch(() => {});
+  S.on = true;
+  document.getElementById('btn-cam').textContent = '⏹ DETENER';
+  setSt('scan', 'Escaneando — apunta al QR…');
+  loop();
 }
 
-function stopCamera() {
-  if (state.stream) {
-    state.stream.getTracks().forEach(t => t.stop());
-    state.stream = null;
-  }
-  if (state.animFrame) {
-    cancelAnimationFrame(state.animFrame);
-    state.animFrame = null;
-  }
-  state.scanning = false;
+function stopCam() {
+  S.stream?.getTracks().forEach(t => t.stop());
+  S.stream = null;
+  cancelAnimationFrame(S.raf);
+  S.raf = null;
+  S.on  = false;
   document.getElementById('video').srcObject = null;
-  document.getElementById('btn-camara').textContent = '📷 INICIAR';
-  setStatus('idle', 'Cámara detenida');
+  document.getElementById('btn-cam').textContent = '📷 INICIAR';
+  setSt('idle', 'Cámara detenida');
 }
 
-// ══════════════════════════════════════════════
-//  LOOP DE ESCANEO
-// ══════════════════════════════════════════════
-function scanLoop() {
-  if (!state.scanning) return;
+// ── LOOP QR ─────────────────────────────────────
+function loop() {
+  if (!S.on) return;
+  const v  = document.getElementById('video');
+  const cv = document.getElementById('cv');
+  const cx = cv.getContext('2d', { willReadFrequently: true });
 
-  const video  = document.getElementById('video');
-  const canvas = document.getElementById('qr-canvas');
-  const ctx    = canvas.getContext('2d', { willReadFrequently: true });
-
-  if (video.readyState === video.HAVE_ENOUGH_DATA) {
-    canvas.width  = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-
-    if (!state.cooldown) {
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code    = jsQR(imgData.data, imgData.width, imgData.height, {
-        inversionAttempts: 'dontInvert',
-      });
-      if (code) handleQR(code.data);
+  if (v.readyState === v.HAVE_ENOUGH_DATA) {
+    cv.width = v.videoWidth; cv.height = v.videoHeight;
+    cx.drawImage(v, 0, 0);
+    if (!S.cool) {
+      const img  = cx.getImageData(0, 0, cv.width, cv.height);
+      const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+      if (code) handle(code.data);
     }
   }
-
-  state.animFrame = requestAnimationFrame(scanLoop);
+  S.raf = requestAnimationFrame(loop);
 }
 
-// ══════════════════════════════════════════════
-//  EXTRAER CUFE
-// ══════════════════════════════════════════════
-function extractCUFE(raw) {
-  // 1) Parámetro cufe= en URL
-  const matchParam = raw.match(/[?&]cufe=([a-fA-F0-9]{96})/i);
-  if (matchParam) return matchParam[1].toLowerCase();
-
-  // 2) Parámetro cude= (documentos equivalentes)
-  const matchCUDE = raw.match(/[?&]cude=([a-fA-F0-9]{96})/i);
-  if (matchCUDE) return matchCUDE[1].toLowerCase();
-
-  // 3) Cadena hex suelta de 96 chars en cualquier lugar del string
-  const matchRaw = raw.match(/\b([a-fA-F0-9]{96})\b/);
-  if (matchRaw) return matchRaw[1].toLowerCase();
-
-  // 4) Formato corto de algunos proveedores (64 chars SHA-256)
-  const matchShort = raw.match(/[?&]cufe=([a-fA-F0-9]{64})/i);
-  if (matchShort) return matchShort[1].toLowerCase();
-
-  return null;
-}
-
-// ══════════════════════════════════════════════
-//  MANEJAR QR
-// ══════════════════════════════════════════════
-function handleQR(raw) {
-  const cufe = extractCUFE(raw);
-
-  if (!cufe) {
-    setStatus('err', 'QR sin CUFE — ¿es una factura DIAN?');
+// ── MANEJAR QR ──────────────────────────────────
+function handle(raw) {
+  // Anti-duplicado: usa el contenido completo como clave
+  if (S.seen.has(raw)) {
+    setSt('dup', 'QR ya registrado — duplicado');
+    toast('Factura ya registrada', 'warn');
+    cooldown(1500);
     return;
   }
 
-  if (state.seen.has(cufe)) {
-    setStatus('dup', 'CUFE ya registrado ↑ duplicado');
-    showToast('Factura ya registrada', 'warn');
-    triggerCooldown(1500);
-    return;
-  }
+  S.seen.add(raw);
+  const doc = { raw, ts: new Date(), n: S.docs.length + 1 };
+  S.docs.unshift(doc);
 
-  // ✅ NUEVO CUFE
-  state.seen.add(cufe);
-  const doc = {
-    cufe,
-    url: raw,
-    ts:  new Date(),
-    idx: state.docs.length + 1,
-  };
-  state.docs.unshift(doc); // más reciente arriba
+  doFlash();
+  cooldown(2000);
+  setSt('ok', `✔ QR #${doc.n} registrado`);
+  toast(`Factura #${doc.n} capturada ✔`);
 
-  flash();
-  triggerCooldown(2000);
-  setStatus('ok', `✔ CUFE #${doc.idx} registrado`);
-  showToast(`Factura #${doc.idx} capturada ✔`);
-  renderLastCUFE(doc);
-  updateCounter();
+  // Mostrar contenido completo
+  document.getElementById('last-content').textContent = raw;
+  document.getElementById('last-meta').textContent    =
+    `Factura #${doc.n} · ${fmt(doc.ts)}`;
+  document.getElementById('last-box').classList.add('on');
+
+  refresh();
 }
 
-// ══════════════════════════════════════════════
-//  UI HELPERS
-// ══════════════════════════════════════════════
-function setStatus(type, msg) {
-  const dot  = document.getElementById('status-dot');
-  const text = document.getElementById('status-text');
-  dot.className  = 'status-dot ' + type;
-  text.textContent = msg;
-}
+// ── RENDER LISTA ────────────────────────────────
+function refresh() {
+  const n = S.docs.length;
+  document.getElementById('cnt').textContent = n;
 
-function flash() {
-  const el = document.getElementById('flash');
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 300);
-}
+  const empty = document.getElementById('empty');
+  const list  = document.getElementById('qr-list');
 
-function triggerCooldown(ms) {
-  state.cooldown = true;
-  setTimeout(() => { state.cooldown = false; }, ms);
-}
-
-function renderLastCUFE(doc) {
-  const box  = document.getElementById('last-box');
-  const val  = document.getElementById('last-cufe');
-  const meta = document.getElementById('last-meta');
-  val.textContent  = doc.cufe;
-  meta.textContent = `Factura #${doc.idx} · ${fmtTime(doc.ts)}`;
-  box.classList.add('show');
-}
-
-function updateCounter() {
-  document.getElementById('counter').textContent = state.docs.length;
-  renderList();
-}
-
-// ══════════════════════════════════════════════
-//  RENDERIZAR LISTA
-// ══════════════════════════════════════════════
-function renderList() {
-  const empty    = document.getElementById('empty');
-  const list     = document.getElementById('cufe-list');
-
-  if (state.docs.length === 0) {
+  if (n === 0) {
     empty.style.display = 'flex';
     list.innerHTML = '';
     return;
   }
-
   empty.style.display = 'none';
-  list.innerHTML = state.docs.map(doc => `
-    <div class="cufe-card" id="card-${doc.idx}">
-      <div class="card-header">
-        <span class="card-num">FACTURA #${doc.idx}</span>
-        <span class="card-time">${fmtTime(doc.ts)}</span>
-        <button class="delete-btn" onclick="deleteDoc(${doc.idx})" title="Eliminar">✕</button>
+
+  list.innerHTML = S.docs.map(d => `
+    <div class="qr-card">
+      <div class="card-top">
+        <span class="card-num">FACTURA #${d.n}</span>
+        <span class="card-time">${fmt(d.ts)}</span>
+        <button class="del" onclick="del(${d.n})">✕</button>
       </div>
-      <div class="card-cufe">${doc.cufe}</div>
-      <div class="card-meta">
-        ${doc.url.length > 80 ? doc.url.substring(0,80)+'…' : doc.url}
-      </div>
+      <div class="card-body">${escHtml(d.raw)}</div>
     </div>
   `).join('');
 }
 
-function deleteDoc(idx) {
-  state.docs = state.docs.filter(d => d.idx !== idx);
-  // Reconstruir set de vistos
-  state.seen = new Set(state.docs.map(d => d.cufe));
-  updateCounter();
-  document.getElementById('counter').textContent = state.docs.length;
+function del(n) {
+  S.docs = S.docs.filter(d => d.n !== n);
+  S.seen = new Set(S.docs.map(d => d.raw));
+  refresh();
 }
 
-// ══════════════════════════════════════════════
-//  EXPORTAR TXT
-// ══════════════════════════════════════════════
+// ── EXPORTAR TXT ────────────────────────────────
 function exportTXT() {
-  if (state.docs.length === 0) { showToast('Nada que exportar', 'warn'); return; }
+  if (!S.docs.length) { toast('Nada que exportar', 'warn'); return; }
 
   const now   = new Date();
   const lines = [];
 
   lines.push('================================================================');
-  lines.push('         REGISTRO DE CUFEs - FACTURACIÓN ELECTRÓNICA DIAN');
+  lines.push('     REGISTRO QR - FACTURAS ELECTRÓNICAS DIAN');
   lines.push('================================================================');
-  lines.push(`Generado    : ${fmtDateTime(now)}`);
-  lines.push(`Total docs  : ${state.docs.length}`);
+  lines.push(`Generado : ${fmtFull(now)}`);
+  lines.push(`Total    : ${S.docs.length} documento(s)`);
   lines.push('================================================================');
   lines.push('');
 
-  // Ordenar por índice original
-  [...state.docs].sort((a,b) => a.idx - b.idx).forEach(doc => {
-    lines.push(`Factura #${String(doc.idx).padStart(3,'0')}`);
-    lines.push(`Fecha     : ${fmtDateTime(doc.ts)}`);
-    lines.push(`CUFE      : ${doc.cufe}`);
-    lines.push(`URL QR    : ${doc.url}`);
-    lines.push('----------------------------------------------------------------');
+  [...S.docs].sort((a, b) => a.n - b.n).forEach(d => {
+    lines.push(`--- FACTURA #${String(d.n).padStart(3,'0')} | ${fmtFull(d.ts)} ---`);
+    lines.push(d.raw);
+    lines.push('');
   });
 
-  lines.push('');
   lines.push('FIN DEL ARCHIVO');
 
-  downloadFile(lines.join('\r\n'), `CUFEs_${fmtFileDate(now)}.txt`, 'text/plain');
-  showToast('TXT descargado ✔');
+  dl(lines.join('\r\n'), `QR_Facturas_${fmtFile(now)}.txt`, 'text/plain');
+  toast('TXT descargado ✔');
 }
 
-// ══════════════════════════════════════════════
-//  EXPORTAR CSV
-// ══════════════════════════════════════════════
-function exportCSV() {
-  if (state.docs.length === 0) { showToast('Nada que exportar', 'warn'); return; }
-
-  const rows = [['#','Fecha','Hora','CUFE','URL_QR']];
-  [...state.docs].sort((a,b) => a.idx - b.idx).forEach(doc => {
-    const d = doc.ts;
-    rows.push([
-      doc.idx,
-      fmtDate(d),
-      fmtHour(d),
-      doc.cufe,
-      `"${doc.url.replace(/"/g,'""')}"`,
-    ]);
-  });
-
-  const csv = rows.map(r => r.join(',')).join('\r\n');
-  downloadFile(csv, `CUFEs_${fmtFileDate(new Date())}.csv`, 'text/csv');
-  showToast('CSV descargado ✔');
-}
-
-// ══════════════════════════════════════════════
-//  LIMPIAR TODO
-// ══════════════════════════════════════════════
+// ── LIMPIAR ─────────────────────────────────────
 function clearAll() {
-  if (state.docs.length === 0) { showToast('Lista ya vacía', 'warn'); return; }
-  if (!confirm(`¿Borrar los ${state.docs.length} documentos?`)) return;
-  state.docs = [];
-  state.seen.clear();
-  document.getElementById('counter').textContent = 0;
-  document.getElementById('last-box').classList.remove('show');
-  renderList();
-  showToast('Lista limpiada');
+  if (!S.docs.length) { toast('Lista ya vacía', 'warn'); return; }
+  if (!confirm(`¿Borrar los ${S.docs.length} documentos?`)) return;
+  S.docs = []; S.seen.clear();
+  document.getElementById('last-box').classList.remove('on');
+  refresh();
+  toast('Lista limpiada');
 }
 
-// ══════════════════════════════════════════════
-//  TOAST
-// ══════════════════════════════════════════════
-let toastTimer = null;
-function showToast(msg, type = '') {
+// ── HELPERS ─────────────────────────────────────
+function setSt(type, msg) {
+  document.getElementById('dot').className  = 'dot ' + type;
+  document.getElementById('stxt').textContent = msg;
+}
+
+function doFlash() {
+  const f = document.getElementById('flash');
+  f.classList.add('go');
+  setTimeout(() => f.classList.remove('go'), 280);
+}
+
+function cooldown(ms) {
+  S.cool = true;
+  setTimeout(() => S.cool = false, ms);
+}
+
+let tTimer;
+function toast(msg, type = '') {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className   = 'toast show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  t.className = 'toast on ' + type;
+  clearTimeout(tTimer);
+  tTimer = setTimeout(() => t.classList.remove('on'), 2300);
 }
 
-// ══════════════════════════════════════════════
-//  DESCARGA
-// ══════════════════════════════════════════════
-function downloadFile(content, filename, mime) {
-  const blob = new Blob(['\uFEFF' + content], { type: mime + ';charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
+function dl(content, name, mime) {
+  const b = new Blob(['\uFEFF' + content], { type: mime + ';charset=utf-8' });
+  const u = URL.createObjectURL(b);
+  const a = document.createElement('a');
+  a.href = u; a.download = name;
+  document.body.appendChild(a); a.click();
   document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 3000);
+  setTimeout(() => URL.revokeObjectURL(u), 3000);
 }
 
-// ══════════════════════════════════════════════
-//  FORMATO FECHAS
-// ══════════════════════════════════════════════
-function pad(n) { return String(n).padStart(2,'0'); }
-
-function fmtTime(d) {
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
-function fmtDate(d) {
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-function fmtHour(d) { return fmtTime(d); }
-function fmtDateTime(d) { return `${fmtDate(d)} ${fmtTime(d)}`; }
-function fmtFileDate(d) {
-  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ══════════════════════════════════════════════
-//  PERSISTENCIA LOCAL (localStorage)
-// ══════════════════════════════════════════════
-function saveLocal() {
+const p2 = n => String(n).padStart(2,'0');
+function fmt(d) {
+  return `${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;
+}
+function fmtFull(d) {
+  return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${fmt(d)}`;
+}
+function fmtFile(d) {
+  return `${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}_${p2(d.getHours())}${p2(d.getMinutes())}`;
+}
+
+// ── PERSISTENCIA ────────────────────────────────
+function save() {
   try {
-    localStorage.setItem('cufe_docs', JSON.stringify(
-      state.docs.map(d => ({ ...d, ts: d.ts.toISOString() }))
+    localStorage.setItem('qr_docs', JSON.stringify(
+      S.docs.map(d => ({ ...d, ts: d.ts.toISOString() }))
     ));
   } catch(e) {}
 }
-
-function loadLocal() {
+function load() {
   try {
-    const raw = localStorage.getItem('cufe_docs');
-    if (!raw) return;
-    const arr = JSON.parse(raw);
-    state.docs = arr.map(d => ({ ...d, ts: new Date(d.ts) }));
-    state.seen = new Set(state.docs.map(d => d.cufe));
-    updateCounter();
+    const r = localStorage.getItem('qr_docs');
+    if (!r) return;
+    S.docs = JSON.parse(r).map(d => ({ ...d, ts: new Date(d.ts) }));
+    S.seen = new Set(S.docs.map(d => d.raw));
+    refresh();
   } catch(e) {}
 }
 
-// Auto-guardar
-setInterval(saveLocal, 5000);
-window.addEventListener('beforeunload', saveLocal);
-
-// ══════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════
-loadLocal();
+setInterval(save, 5000);
+window.addEventListener('beforeunload', save);
+load();
 </script>
 </body>
 </html>
